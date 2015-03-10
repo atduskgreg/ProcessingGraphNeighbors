@@ -18,18 +18,38 @@ class Map {
       }
     }
   }
-  
-  Cell containingCell(int x, int y){
+
+  Cell containingCell(int x, int y) {
     return getCell(x/squareSize(), y/squareSize());
   }
-  
-  Cell getCell(int col, int row){
-    println(col + "," + row);
+
+  Cell getCell(int col, int row) {
     return cells[col][row];
   }
 
   int squareSize() {
     return this.width/this.cols;
+  }
+
+  ArrayList<Cell> getHighlightedCells() {
+    ArrayList<Cell> result = new ArrayList<Cell>();
+    for (int col = 0; col < cols; col++) {
+      for (int row = 0; row < rows; row++) {
+        Cell cell = cells[col][row];
+        if (cell.isHighlighted()) {
+          result.add(cell);
+        }
+      }
+    }
+    return result;
+  }
+  
+  void clearHighlights(){
+    for (int col = 0; col < cols; col++) {
+      for (int row = 0; row < rows; row++) {
+        cells[col][row].setHighlighted(false);
+      }
+    }
   }
 
   void draw() {
@@ -49,46 +69,95 @@ class Cell {
   int row;
   Map map;
   boolean highlighted = false;
+  static final int E = 0;
+  static final int S = 1;
+  static final int W = 2;
+  static final int N = 3;
+  static final int SE = 4;
+  static final int NE = 5;
+  static final int NW = 6;
+  static final int SW = 7;
+  int[][] dirs;
 
   Cell(Map map, int col, int row) {
     this.map = map;
     this.col = col;
     this.row = row;
+    this.dirs = new int[][] {
+      {
+        1, 0
+      }
+      , {
+        0, 1
+      }
+      , {
+        -1, 0
+      }
+      , {
+        0, -1
+      }
+// add these for diagonal connectivity
+//      , {
+//        1, 1
+//      }
+//      , {
+//        1, -1
+//      }
+//      , {
+//        -1, -1
+//      }
+//      , {
+//        -1, 1
+//      }
+    };
   }
 
-  ArrayList<Cell> getNeighbors(){
-    int[][] dirs = new int[][] {{1, 0}, {0, 1}, {-1, 0}, {0, -1},{1,1}, {1,-1}, {-1,-1}, {-1,1}}; // diagonally adjacent: {1,1}, {1,-1}, {-1-1}, {-1,1};
-    ArrayList<Cell> result = new ArrayList<Cell>();
-    println(dirs.length);
-    for(int i = 0; i < dirs.length; i++){
-      // deal with boundary conditions
-      println("i: " + i + " " + this.col + "x" + this.row + " d: " +dirs[i][0] +","+dirs[i][1]);
-      if(this.col == (map.cols-1) && dirs[i][0] > 0 ){
-        continue;
-      }
-      if(this.row == (map.rows-1) && dirs[i][1] > 0){
-        continue;
-      }
-      if(this.col == 0 && dirs[i][0] < 0){
-        continue;
-      }
-      if(this.row == 0 && dirs[i][1] < 0){
-        continue;
-      }
-      
-      
-      result.add(map.getCell(this.col + dirs[i][0], this.row + dirs[i][1]));
+  Cell getNeighbor(int d) {
+    return map.getCell(this.col + dirs[d][0], this.row + dirs[d][1]);
+  }
+
+  boolean isHighlighted() {
+    return highlighted;
+  }
+
+  boolean neighborExists(int d) {
+    return neighborExists(dirs[d]);
+  }
+  
+  boolean neighborExists(int[] d) {
+    if (this.col == (map.cols-1) && d[0] > 0 ) {
+      return false;
     }
-    
+    if (this.row == (map.rows-1) && d[1] > 0) {
+      return false;
+    }
+    if (this.col == 0 && d[0] < 0) {
+      return false;
+    }
+    if (this.row == 0 && d[1] < 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+  ArrayList<Cell> getNeighbors() {
+    ArrayList<Cell> result = new ArrayList<Cell>();
+    for (int i = 0; i < dirs.length; i++) {
+      if (neighborExists(dirs[i])) {
+        result.add(map.getCell(this.col + dirs[i][0], this.row + dirs[i][1]));
+      }
+    }
+
     return result;
   }
-  
-  void setHighlighted(boolean bool){
+
+  void setHighlighted(boolean bool) {
     this.highlighted = bool;
   }
-  
-  void highlightNeighbors(boolean bool){
-    for(Cell neighbor : getNeighbors()){
+
+  void highlightNeighbors(boolean bool) {
+    for (Cell neighbor : getNeighbors ()) {
       neighbor.setHighlighted(bool);
     }
   }
@@ -96,10 +165,28 @@ class Cell {
   void draw() {
     pushMatrix();
     pushStyle();
-    if(highlighted){
-      fill(255,0,0);
+    if (highlighted) {
+      fill(255, 0, 0);
+      stroke(125);
+      rect(0, 0, map.squareSize(), map.squareSize());
+      strokeWeight(2);
+      stroke(0);
+      if(neighborExists(Cell.N) && !getNeighbor(Cell.N).isHighlighted()){
+        line(0,0,map.squareSize(),0);
+      }
+      if(neighborExists(Cell.E) && !getNeighbor(Cell.E).isHighlighted()){
+        line(map.squareSize(),0,map.squareSize(), map.squareSize());
+      }
+      
+      if(neighborExists(Cell.S) && !getNeighbor(Cell.S).isHighlighted()){
+        line(0,map.squareSize(),map.squareSize(),map.squareSize());
+      }
+      
+      if(neighborExists(Cell.W) && !getNeighbor(Cell.W).isHighlighted()){
+        line(0,0,0, map.squareSize());
+      }
     }
-    rect(0,0,map.squareSize(), map.squareSize());
+   
     popStyle();
     popMatrix();
   }
