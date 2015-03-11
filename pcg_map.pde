@@ -2,12 +2,22 @@ Map map;
 Cell seedCell;
 boolean clickToExpand = false; // set in seed functions
 String strategyName = "strategyName";
-boolean saveFrames = true;
+boolean saveFrames = false;
+
+Character character;
+
+ArrayList<Cell> path;
 
 void setup() {
   size(800, 800);
   map = new Map(8, 8, width, height);
+  character = new Character(map, map.randomCell());
+  character.setDestination(map.randomCell());
   setSeeds();
+  
+  character.buildPathMap();
+  
+  path = character.getPath();
 }
 
 void setSeeds() {
@@ -15,6 +25,8 @@ void setSeeds() {
   connectedRooms();
   //   lineStart();
   //   twoSeeds();
+  character.buildPathMap();
+  path = character.getPath();
 }
 
 // Begin seed strategies  ====================
@@ -37,6 +49,10 @@ void connectedRooms() {
   room1.connectToCell(room2);
   room1.connectToCell(room3);
   room2.connectToCell(room3);
+  
+  character.setPosition(room1);
+  character.setDestination(map.randomCell());
+
 }
 
 void lineStart() {
@@ -93,13 +109,37 @@ boolean onDiagonal(Cell cell1, Cell cell2, boolean up) {
 }
 
 
+void drawPath(ArrayList<Cell> path){
+  pushStyle();
+  stroke(0,0,255);
+  fill(0);
+  PVector start = map.cellPosition(character.destination);
+  PVector first = map.cellPosition(path.get(0));
+  line(start.x + 50, start.y + 50, first.x + 50, first.y+50);
+  for(int i = 1; i < path.size(); i++){
+    PVector prev = map.cellPosition(path.get(i-1));
+    PVector curr = map.cellPosition(path.get(i));
+    line(prev.x + 50, prev.y + 50, curr.x + 50, curr.y + 50);
+
+
+  }
+  PVector last = map.cellPosition(path.get(path.size()-1));
+  PVector end = map.cellPosition(character.position);
+  line(last.x + 50, last.y+50, end.x + 50, end.y+50);
+
+  popStyle();
+}
+
 void draw() {
   background(255);
 
   noFill();
   stroke(0);
   map.draw();
-
+  character.draw();
+  
+  drawPath(path);
+  
   fill(255);
   stroke(0);
   strokeWeight(2);
@@ -125,5 +165,18 @@ void keyPressed() {
       }
     }
   }
+}
+
+void mouseMoved(){
+  if(map.containingCell(mouseX, mouseY).isHighlighted()){
+    character.setDestination(map.containingCell(mouseX, mouseY));
+    path = character.getPath();
+  }
+//  
+//  if(character.position.equals(map.containingCell(mouseX, mouseY))){
+//    println("new square");
+//  } else {
+//    println("same");
+//  }
 }
 

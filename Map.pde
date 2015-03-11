@@ -26,9 +26,18 @@ class Map {
   Cell getCell(int col, int row) {
     return cells[col][row];
   }
+  
+  Cell randomCell(){
+    return getCell((int)random(cols), (int)random(rows));
+  }
 
   int squareSize() {
     return this.width/this.cols;
+  }
+  
+  Cell randomHighlightedCell(){
+    ArrayList<Cell> highlightedCells = getHighlightedCells();
+    return highlightedCells.get(random(highlightedCells.size()));
   }
 
   ArrayList<Cell> getHighlightedCells() {
@@ -52,11 +61,15 @@ class Map {
     }
   }
 
+  PVector cellPosition(Cell cell){
+    return new PVector(cell.col*squareSize(), cell.row*squareSize());
+  }
+
   void draw() {
     for (int col = 0; col < cols; col++) {
       for (int row = 0; row < rows; row++) {
         pushMatrix();
-        translate(col*squareSize(), row*squareSize());
+        translate(cellPosition(cells[col][row]).x, cellPosition(cells[col][row]).y);
         cells[col][row].draw();
         popMatrix();
       }
@@ -159,6 +172,20 @@ class Cell {
 
     return result;
   }
+  
+  ArrayList<Cell> connectedNeighbors() {
+    ArrayList<Cell> result = new ArrayList<Cell>();
+    for (int i = 0; i < dirs.length; i++) {
+      if (neighborExists(dirs[i])) {
+        Cell neighbor = map.getCell(this.col + dirs[i][0], this.row + dirs[i][1]);
+        if(this.highlighted == neighbor.highlighted){
+          result.add(neighbor);
+        }
+      }
+    }
+
+    return result;
+  }
 
   void setHighlighted(boolean bool) {
     this.highlighted = bool;
@@ -189,6 +216,10 @@ class Cell {
         map.getCell(i, j).setHighlighted(true);
       }
     }
+  }
+  
+  Boolean equals(Cell cell){
+    return this.col == cell.col && this.row == cell.row;
   }
 
   void draw() {
