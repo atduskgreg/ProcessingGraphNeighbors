@@ -43,8 +43,8 @@ class Map {
     }
     return result;
   }
-  
-  void clearHighlights(){
+
+  void clearHighlights() {
     for (int col = 0; col < cols; col++) {
       for (int row = 0; row < rows; row++) {
         cells[col][row].setHighlighted(false);
@@ -96,20 +96,28 @@ class Cell {
       , {
         0, -1
       }
-// add these for diagonal connectivity
-//      , {
-//        1, 1
-//      }
-//      , {
-//        1, -1
-//      }
-//      , {
-//        -1, -1
-//      }
-//      , {
-//        -1, 1
-//      }
+      // add these for diagonal connectivity
+      , {
+        1, 1
+      }
+      , {
+        1, -1
+      }
+      , {
+        -1, -1
+      }
+      , {
+        -1, 1
+      }
     };
+  }
+
+  int getCol() {
+    return col;
+  }
+
+  int getRow() {
+    return row;
   }
 
   Cell getNeighbor(int d) {
@@ -123,7 +131,7 @@ class Cell {
   boolean neighborExists(int d) {
     return neighborExists(dirs[d]);
   }
-  
+
   boolean neighborExists(int[] d) {
     if (this.col == (map.cols-1) && d[0] > 0 ) {
       return false;
@@ -162,6 +170,29 @@ class Cell {
     }
   }
 
+  void connectToCell(Cell other) {
+    int i = this.col;
+    if (this.col != other.col) {
+      int colDir = (other.col - this.col)/abs((this.col - other.col));
+      i = this.col;
+      while (i != other.col) {
+        i += colDir;
+        println(i + "x" + this.row);
+        map.getCell(i, this.row).setHighlighted(true);
+      }
+    }
+
+    if (this.row != other.row) {
+      int rowDir = (other.row - this.row)/abs((this.row - other.row));
+      int j = this.row;
+      while (j != other.row) {
+        j += rowDir;
+        println(i + "x" + j);
+        map.getCell(i, j).setHighlighted(true);
+      }
+    }
+  }
+
   void draw() {
     pushMatrix();
     pushStyle();
@@ -171,22 +202,22 @@ class Cell {
       rect(0, 0, map.squareSize(), map.squareSize());
       strokeWeight(2);
       stroke(0);
-      if(neighborExists(Cell.N) && !getNeighbor(Cell.N).isHighlighted()){
-        line(0,0,map.squareSize(),0);
+      if (neighborExists(Cell.N) && !getNeighbor(Cell.N).isHighlighted()) {
+        line(0, 0, map.squareSize(), 0);
       }
-      if(neighborExists(Cell.E) && !getNeighbor(Cell.E).isHighlighted()){
-        line(map.squareSize(),0,map.squareSize(), map.squareSize());
+      if (neighborExists(Cell.E) && !getNeighbor(Cell.E).isHighlighted()) {
+        line(map.squareSize(), 0, map.squareSize(), map.squareSize());
       }
-      
-      if(neighborExists(Cell.S) && !getNeighbor(Cell.S).isHighlighted()){
-        line(0,map.squareSize(),map.squareSize(),map.squareSize());
+
+      if (neighborExists(Cell.S) && !getNeighbor(Cell.S).isHighlighted()) {
+        line(0, map.squareSize(), map.squareSize(), map.squareSize());
       }
-      
-      if(neighborExists(Cell.W) && !getNeighbor(Cell.W).isHighlighted()){
-        line(0,0,0, map.squareSize());
+
+      if (neighborExists(Cell.W) && !getNeighbor(Cell.W).isHighlighted()) {
+        line(0, 0, 0, map.squareSize());
       }
     }
-   
+
     popStyle();
     popMatrix();
   }
