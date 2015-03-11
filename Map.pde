@@ -177,7 +177,6 @@ class Cell {
       i = this.col;
       while (i != other.col) {
         i += colDir;
-        println(i + "x" + this.row);
         map.getCell(i, this.row).setHighlighted(true);
       }
     }
@@ -187,7 +186,6 @@ class Cell {
       int j = this.row;
       while (j != other.row) {
         j += rowDir;
-        println(i + "x" + j);
         map.getCell(i, j).setHighlighted(true);
       }
     }
