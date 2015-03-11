@@ -4,7 +4,7 @@ A sketchpad for playing with some graph-based algorithms for procedural map-gene
 
 ### Pathfinding in Connected Rooms
 
-<img src="http://gregborenstein.com/assets/map_generation_pathfinding.gif" />
+<img src="http://gregborenstein.com/assets/map_generation_pathing.gif" />
 
 ### Start from Two Points
 
